@@ -14,10 +14,10 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root"]
-      interval: 3s
-      timeout: 30s
+      interval: 20s
+      timeout: 50s
       retries: 5
-      start_period: 3s
+      start_period: 70s
     volumes:
       - "mariadb:/var/lib/mysql"
 
@@ -78,10 +78,18 @@ secrets:
 volumes:
   mariadb:
     name: mariadb
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/${USER}/data/mariadb
   wordpress:
     name: wordpress
-  nginx:
-    name: nginx
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/${USER}/data/wordpress
 
 networks:
   Inception:

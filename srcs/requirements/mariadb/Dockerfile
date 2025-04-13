@@ -29,29 +29,3 @@ RUN chmod +x /entrypoint.sh
 # when Docker tries to execute the script upon container startup, it would fail with a "permission denied" error.
 
 ENTRYPOINT [ "/entrypoint.sh" ]
-
-# ENTRYPOINT
-# 
-# Defines the executable that will always run when the container starts
-# Harder to override - requires --entrypoint flag when running the container
-# Often used for scripts that set up the environment before the main process runs
-# Commands passed to docker run are appended as arguments to the ENTRYPOINT
-# 
-# CMD
-# 
-# Provides default arguments for the ENTRYPOINT
-# Easily overridden by providing arguments to docker run
-# If no ENTRYPOINT is specified, CMD becomes the main command that runs
-# 
-# Key Differences:
-# 
-# Override behavior:
-# 
-# ENTRYPOINT is harder to override (requires special flag)
-# CMD is easily overridden by any command line arguments
-# 
-# 
-# Use cases:
-# 
-# ENTRYPOINT: For containers that always run the same application
-# CMD: For providing default arguments that might change

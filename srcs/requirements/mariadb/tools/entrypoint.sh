@@ -26,7 +26,9 @@ if [ ! -d "${MARIADB_DATABASE_DIR}/mysql" ]; then
     CREATE DATABASE IF NOT EXISTS $DB_NAME;
     CREATE USER IF NOT EXISTS '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
     GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%' WITH GRANT OPTION;
-    FLUSH PRIVILEGES;"
+    FLUSH PRIVILEGES;
+    ALTER USER '$DB_ROOT_USER'@'localhost' IDENTIFIED BY '$DB_ROOT_PASSWORD';"
+
     # FLUSH PRIVILEGES; - Makes the privilege changes take effect immediately without restarting the database.
 
     mysqladmin -u root shutdown
@@ -46,4 +48,9 @@ fi
 # --pid-file=$MARIADB_PID_FILE - Indicates where to save the process ID file, 
 #   which is used to track the running MariaDB process
 
-# "daemon executable" refers to the server process that runs in the background continuously handling requests.
+
+# mysql -u root -proot
+# SHOW DATABASES;
+# USE mydatabase
+# SHOW TABLES;
+# SELECT * FROM wp_comments;
