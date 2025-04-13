@@ -1,0 +1,114 @@
+services:
+  mariadb:
+    build: ./requirements/mariadb
+    image: mariadb
+    container_name: mariadb
+    expose:
+      - "3306"
+    secrets:
+      - DB_PASSWORD
+      - DB_ROOT_PASSWORD
+    networks:
+      - Inception
+    env_file: .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root"]
+      interval: 3s
+      timeout: 30s
+      retries: 5
+      start_period: 3s
+    volumes:
+      - "mariadb:/var/lib/mysql"
+
+  wordpress:
+    build: ./requirements/wordpress
+    image: wordpress
+    container_name: wordpress
+    secrets:
+      - CREDENTIALS
+      - DB_PASSWORD
+    networks:
+      - Inception
+    restart: unless-stopped
+    env_file: .env
+    expose:
+      - "9000"
+    volumes:
+      - "wordpress:/var/www/html/wordpress"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php-fpm83", "-t"]
+      interval: 3s
+      timeout: 30s
+      retries: 3
+
+  nginx:
+    build: ./requirements/nginx
+    image: nginx
+    container_name: nginx
+    restart: unless-stopped
+    ports: ["443:443"]
+    env_file: .env
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    networks:
+      - Inception
+    volumes:
+      - "wordpress:/var/www/html/wordpress"
+    depends_on:
+      wordpress:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 3s
+      timeout: 30s
+      retries: 3
+    
+secrets:
+  DB_PASSWORD:
+    file: ../secrets/db_password.txt
+  DB_ROOT_PASSWORD:
+    file: ../secrets/db_root_password.txt
+  CREDENTIALS:
+    file: ../secrets/credentials.txt
+
+volumes:
+  mariadb:
+    name: mariadb
+  wordpress:
+    name: wordpress
+  nginx:
+    name: nginx
+
+networks:
+  Inception:
+    name: Inception
+    driver: bridge
+
+
+
+# secrets:
+# The secrets section in docker-compose.yml defines your sensitive data.
+# The secrets list under a service tells Docker to make those secrets available to that container.
+# Docker automatically mounts each secret as a file at /run/secrets/SECRET_NAME inside the container.
+# /run/secrets/ is Docker's standard location for secrets, not something you create manually.
+# Your script can then read these secret files with cat /run/secrets/DB_PASSWORD.
+# This system lets containers access sensitive data without hardcoding passwords.
+
+# is the run directory different than the one used by openrc
+# This single /run directory has different subdirectories for different purposes:
+  # /run/openrc/ - Used by OpenRC for service management
+  # /run/mysqld/ - Used by MariaDB for its socket and runtime files
+  # /run/secrets/ - Used by Docker to mount secrets into the container
+
+# who created the run directory?
+  # 1- Is created by Alpine Linux (your base OS), not by Docker or OpenRC
+  # 2- Is a standard Linux directory for runtime files
+  # 3- Each program (Docker, OpenRC, MariaDB) creates its own subdirectory there
+  # 4- They all know to use /run because it's the Linux standard
+
+
+# DOMAIN_NAME=${DOMAIN_NAME}: This passes your domain name (like example.com or mydomain.local) from outside the container to inside the container.
