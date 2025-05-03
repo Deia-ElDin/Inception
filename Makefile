@@ -1,9 +1,14 @@
 all: create_dir build
 	cd srcs && docker compose up -d
 
+# change /home/${USER} to your current working directory 
 create_dir:
 	mkdir -p /home/${USER}/data/mariadb
 	mkdir -p /home/${USER}/data/wordpress
+
+# create_dir:
+# 	mkdir -p /Users/dehamad/Desktop/incep/data/mariadb
+# 	mkdir -p /Users/dehamad/Desktop/incep/data/wordpress
 
 down:
 	cd srcs && docker compose down
@@ -29,11 +34,15 @@ fclean:
 	-docker image rm -f $(docker image ls -a)
 	-yes | docker system prune -a
 
-# docker stop $(docker ps -qa)
-# docker rm $(docker ps -qa)
-# docker rmi -f $(docker images -qa)
-# docker volume rm $(docker volume ls -q)
-# docker network rm $(docker network ls -q)
+# remove the sudo if you don't have that access / not working with your own virtual machine
+# fclean: 
+# 	-rm -rf /Users/dehamad/Desktop/incep/data/
+# 	-cd srcs && docker compose down
+# 	-docker container rm -f $(docker container ls -a)
+# 	-docker volume rm mariadb wordpress
+# 	-docker network rm -f $(docker network ls -a)
+# 	-docker image rm -f $(docker image ls -a)
+# 	-yes | docker system prune -a
 
 restart:
 	cd srcs && docker compose restart
